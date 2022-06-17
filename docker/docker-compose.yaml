@@ -1,0 +1,53 @@
+version: '3.8'
+services:
+  nodejs:
+    build:
+      context: ./nodejs
+    volumes:
+      - ./../:/var/www/
+    working_dir: /var/www
+    ports:
+      - "${BACKEND_HTTP_PORT}:3000"
+    expose:
+      - 3000
+    environment:
+      HTTP_PORT: ${BACKEND_HTTP_PORT}
+      # mongoDB
+      MONGODB_ADMIN_USERNAME: ${MONGODB_INITDB_ROOT_USERNAME}
+      MONGODB_ADMIN_PASSWORD: ${MONGODB_INITDB_ROOT_PASSWORD}
+      MONGODB_USERNAME: ${MONGODB_VP_USER}
+      MONGODB_PASSWORD: ${MONGODB_VP_PASSWORD}
+      MONGODB_DATABASE: ${MONGODB_INITDB_DATABASE}
+      MONGODB_PORT: ${MONGODB_PORT}
+      MONGODB_HOST: ${MONGODB_HOST}
+      MONGODB_PROTOCOL: ${MONGODB_PROTOCOL}
+    networks:
+      - appnet
+    depends_on:
+      - mongo
+    tty: true
+
+  mongo:
+    build:
+      context: ./mongodb
+    environment:
+      LOCAL_DEV: "true"
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGODB_INITDB_DATABASE}
+      MONGO_NON_ROOT_USERNAME: ${MONGODB_VP_USER}
+      MONGO_NON_ROOT_PASSWORD: ${MONGODB_VP_PASSWORD}
+    ports:
+      - "${MONGODB_EXTERNAL_PORT}:27017"
+    command: --auth
+    volumes:
+      - mongoData:/data/db
+    networks:
+      - appnet
+
+volumes:
+  mongoData:
+
+networks:
+  appnet:
+    driver: "bridge"
