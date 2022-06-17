@@ -1,15 +1,7 @@
-import { ApolloServer } from 'apollo-server';
-import {resolvers} from './resolvers';
-import {schemas} from './schemas';
 import {initMongoDbConnection} from './utils/mongodb.service';
-import {setHttpPlugin} from './utils/error-http-plugin';
+import {createServer} from './server';
 
-const server = new ApolloServer({
-    typeDefs: schemas,
-    resolvers,
-    plugins: [setHttpPlugin]
-});
-
+const server = createServer();
 
 initMongoDbConnection(process.env, () => {
     const port = 3000;

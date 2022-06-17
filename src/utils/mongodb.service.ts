@@ -1,25 +1,18 @@
 import mongoose from 'mongoose';
 
-function getMongoDbURI(protocol: string, login: string, password: string, dbname: string, host: string, port: string): string {
-    if (!protocol) {
-        protocol = 'mongodb';
-    }
-
+export const getMongoDbURI = (protocol: string, login: string, password: string, dbname: string, host: string, port: string): string => {
     const connectionSettings = [
         `${protocol}://`,
         login,
         ':',
         password,
         '@',
-        host
+        host,
+        ':',
+        port,
+        '/',
+        dbname
     ];
-
-    if (protocol === 'mongodb') {
-        connectionSettings.push(`:${port}`);
-    }
-
-    connectionSettings.push('/');
-    connectionSettings.push(dbname);
 
     return connectionSettings.join('');
 }
@@ -33,10 +26,6 @@ function initMongoDbConnection(env: any, callback: any = null) {
         env.MONGODB_HOST,
         env.MONGODB_PORT
     );
-
-    if (!!env.MONGODB_REPLICA_SET) {
-        dbConnection = `${dbConnection}?replicaSet=${env.MONGODB_REPLICA_SET}`;
-    }
 
     console.log("DB connection:",dbConnection);
     mongoose.connect(
